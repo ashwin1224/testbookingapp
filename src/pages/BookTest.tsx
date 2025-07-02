@@ -331,16 +331,23 @@ const BookTest: React.FC = () => {
                               </div>
                             </div>
                             <div className="mt-4 md:mt-0">
-                              <button
-                                disabled={!testDate.available}
-                                className={`w-full md:w-auto px-6 py-3 rounded-lg text-sm font-semibold transition duration-150 ease-in-out ${
-                                  testDate.available
-                                    ? 'bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                }`}
-                              >
-                                {testDate.available ? 'Book Now' : 'Fully Booked'}
-                              </button>
+                              {testDate.available ? (
+                                <a
+                                  href="https://ielts.org/test-centres"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-block w-full md:w-auto px-6 py-3 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out text-center"
+                                >
+                                  Book Now
+                                </a>
+                              ) : (
+                                <button
+                                  disabled
+                                  className="w-full md:w-auto px-6 py-3 rounded-lg text-sm font-semibold bg-gray-100 text-gray-400 cursor-not-allowed"
+                                >
+                                  Fully Booked
+                                </button>
+                              )}
                             </div>
                           </div>
                         </div>
