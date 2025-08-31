@@ -2,6 +2,7 @@ export interface BlogPost {
   id: string;
   title: string;
   summary: string;
+  blurb: string;
   content: string;
   publishDate: string;
   author: BlogAuthor;
@@ -10,6 +11,13 @@ export interface BlogPost {
   imageUrl: string;
   readTime: string;
   slug: string;
+  meta: {
+    title: string;
+    description: string;
+    keywords: string[];
+    ogImage?: string;
+    canonicalUrl?: string;
+  };
 }
 
 export interface BlogPostDetail extends BlogPost {
