@@ -3,6 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { BlogPost, BlogPostDetail } from '../types/blog';
 import { blogService } from '../services/blogService';
 import { blogTags } from '../data/mockBlogData';
+import BlogSEO from '../components/BlogSEO';
+import BlogBlurb from '../components/BlogBlurb';
 
 const BlogDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -82,6 +84,7 @@ const BlogDetail: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
+      {post && <BlogSEO post={post} />}
       <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <header className="mb-8">
@@ -134,9 +137,14 @@ const BlogDetail: React.FC = () => {
           })}
         </div>
 
+        {/* Blurb */}
+        <div className="mb-8">
+          <BlogBlurb blurb={post.blurb} className="text-lg text-gray-700 bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400" />
+        </div>
+
         {/* Content */}
         <div
-          className="prose prose-lg max-w-none"
+          className="max-w-none"
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
 

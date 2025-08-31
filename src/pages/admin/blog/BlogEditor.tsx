@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { BlogPost, BlogCategory, BlogTag } from '../../../types/blog';
 import { blogService } from '../../../services/blogService';
 import { blogCategories, blogTags } from '../../../data/mockBlogData';
 
 interface EditorState {
   title: string;
   summary: string;
+  blurb: string;
   category: string;
   tags: string[];
   content: string;
@@ -17,6 +17,13 @@ interface EditorState {
     avatar?: string;
   };
   readTime: string;
+  meta: {
+    title: string;
+    description: string;
+    keywords: string[];
+    ogImage?: string;
+    canonicalUrl?: string;
+  };
 }
 
 const BlogEditor: React.FC = () => {
@@ -28,6 +35,7 @@ const BlogEditor: React.FC = () => {
   const [editorState, setEditorState] = useState<EditorState>({
     title: '',
     summary: '',
+    blurb: '',
     category: '',
     tags: [],
     content: '',
@@ -37,6 +45,13 @@ const BlogEditor: React.FC = () => {
       role: '',
     },
     readTime: '',
+    meta: {
+      title: '',
+      description: '',
+      keywords: [],
+      ogImage: '',
+      canonicalUrl: '',
+    },
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showPreview, setShowPreview] = useState(false);
@@ -61,12 +76,14 @@ const BlogEditor: React.FC = () => {
       setEditorState({
         title: post.title,
         summary: post.summary,
+        blurb: post.blurb,
         category: post.category,
         tags: post.tags,
         content: post.content,
         imageUrl: post.imageUrl,
         author: post.author,
         readTime: post.readTime,
+        meta: post.meta,
       });
     } catch (err) {
       setError('Failed to load blog post');
@@ -86,6 +103,15 @@ const BlogEditor: React.FC = () => {
         ...prev,
         author: {
           ...prev.author,
+          [field]: value,
+        },
+      }));
+    } else if (name.startsWith('meta.')) {
+      const field = name.split('.')[1];
+      setEditorState(prev => ({
+        ...prev,
+        meta: {
+          ...prev.meta,
           [field]: value,
         },
       }));
@@ -243,7 +269,7 @@ const BlogEditor: React.FC = () => {
 
             {/* Preview content */}
             <div className="mt-2">
-              <article className="prose prose-lg max-w-none">
+              <article className="max-w-none">
                 {/* Header */}
                 <header className="mb-8">
                   <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -305,7 +331,7 @@ const BlogEditor: React.FC = () => {
 
                 {/* Content */}
                 <div 
-                  className="prose prose-lg max-w-none"
+                  className="max-w-none"
                   dangerouslySetInnerHTML={{ __html: editorState.content }}
                 />
               </article>
@@ -440,6 +466,26 @@ const BlogEditor: React.FC = () => {
                   placeholder="Enter post title"
                   className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-lg"
                 />
+              </div>
+
+              {/* Blurb */}
+              <div>
+                <label htmlFor="blurb" className="block text-sm font-medium text-gray-700">
+                  Blurb (SEO Description)
+                </label>
+                <textarea
+                  id="blurb"
+                  name="blurb"
+                  value={editorState.blurb}
+                  onChange={handleInputChange}
+                  required
+                  rows={3}
+                  placeholder="Brief description for search engines (150-160 characters recommended)"
+                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                />
+                <p className="mt-1 text-sm text-gray-500">
+                  {editorState.blurb.length}/160 characters
+                </p>
               </div>
 
               {/* Content Editor */}
@@ -645,6 +691,78 @@ const BlogEditor: React.FC = () => {
                           value={editorState.author.role}
                           onChange={handleInputChange}
                           required
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SEO Meta Fields */}
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-medium text-gray-700">SEO Settings</h4>
+                    <div className="space-y-4">
+                      <div>
+                        <label htmlFor="meta.title" className="block text-sm font-medium text-gray-700">
+                          SEO Title
+                        </label>
+                        <input
+                          type="text"
+                          id="meta.title"
+                          name="meta.title"
+                          value={editorState.meta.title}
+                          onChange={handleInputChange}
+                          placeholder="SEO-optimized title (includes brand name)"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="meta.description" className="block text-sm font-medium text-gray-700">
+                          Meta Description
+                        </label>
+                        <textarea
+                          id="meta.description"
+                          name="meta.description"
+                          value={editorState.meta.description}
+                          onChange={handleInputChange}
+                          rows={3}
+                          placeholder="SEO description for search results"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="meta.keywords" className="block text-sm font-medium text-gray-700">
+                          Keywords (comma-separated)
+                        </label>
+                        <input
+                          type="text"
+                          id="meta.keywords"
+                          name="meta.keywords"
+                          value={editorState.meta.keywords.join(', ')}
+                          onChange={(e) => {
+                            const keywords = e.target.value.split(',').map(k => k.trim()).filter(Boolean);
+                            setEditorState(prev => ({
+                              ...prev,
+                              meta: {
+                                ...prev.meta,
+                                keywords,
+                              },
+                            }));
+                          }}
+                          placeholder="keyword1, keyword2, keyword3"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="meta.canonicalUrl" className="block text-sm font-medium text-gray-700">
+                          Canonical URL
+                        </label>
+                        <input
+                          type="url"
+                          id="meta.canonicalUrl"
+                          name="meta.canonicalUrl"
+                          value={editorState.meta.canonicalUrl || ''}
+                          onChange={handleInputChange}
+                          placeholder="https://example.com/blog/post-slug"
                           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                         />
                       </div>
